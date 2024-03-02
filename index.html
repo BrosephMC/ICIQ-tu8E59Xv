@@ -4,18 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Basic Website</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
     <style>
+        #map {
+            height: 300px;
+            padding: 20px;
+            
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-
         }
         header {
-            background-color: #4e7c19;
+            background-image: url('pic.jpg');
+            background-size: cover;
+            background-position: center;
             color: #fff;
-            padding: 5px 0;
+            padding: 75px; /* Adjust the padding as needed */
             text-align: center;
+            font-size: 30px;
         }
         nav {
             background-color: #666;
@@ -41,6 +49,18 @@
             width: 100%;
             bottom: 0;
         }
+        /* Styling for the custom upload button */
+        #customButton {
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+        }
+        #customButton:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -56,19 +76,19 @@
     <main>
         <h2>Welcome To Cleen</h2>
         <p>We love green things and that why we need YOU to help keep things green </p>
-        <img src="pic.jpg" alt="My Image">
+        <div id="map"></div>
         <div id="imageContainer"></div>
     </main>
     <footer>
         <h1>Image Upload</h1>
-        <input type="file" id="imageInput" accept="image/*">
-        <button onclick="uploadImage()">Upload</button>
-        
+        <!-- Hidden file input -->
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        <!-- Custom button to trigger file input -->
+        <button id="customButton" onclick="document.getElementById('imageInput').click()">Upload Image</button>
 
         <script>
-            function uploadImage() {
-                const fileInput = document.getElementById('imageInput');
-                const file = fileInput.files[0];
+            document.getElementById('imageInput').addEventListener('change', function() {
+                const file = this.files[0];
                 if (!file) {
                     alert('Please select an image.');
                     return;
@@ -81,7 +101,73 @@
                     imageContainer.innerHTML = '<img src="' + imageUrl + '" alt="Uploaded Image">';
                 };
                 reader.readAsDataURL(file);
+            });
+        </script>
+
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script>
+            // Function to initialize the map
+            function initMap() {
+                // Check if geolocation is supported
+                if (navigator.geolocation) {
+                    // Request permission to access location
+                    navigator.geolocation.getCurrentPosition(showPosition, showError);
+                } else {
+                    alert("Geolocation is not supported by this browser.");
+                }
             }
+
+            // Function to display user's location and custom markers on the map
+            function showPosition(position) {
+                let latitude = position.coords.latitude;
+                let longitude = position.coords.longitude;
+
+                // Create map centered at user's location
+                let map = L.map('map').setView([latitude, longitude], 15);
+
+                // Add tile layer (OpenStreetMap)
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                // Add marker for user's location
+                L.marker([latitude, longitude]).addTo(map)
+                    .bindPopup('Your Location')
+                    .openPopup();
+
+                // Array of custom markers with their locations
+                let customMarkers = [
+                    { lat: latitude + 0.01, lng: longitude + 0.01, title: 'Custom Marker 1', description: 'This is a custom marker.' },
+                    { lat: latitude - 0.01, lng: longitude - 0.01, title: 'Custom Marker 2', description: 'Another custom marker.' }
+                ];
+
+                // Add custom markers to the map
+                customMarkers.forEach(marker => {
+                    L.marker([marker.lat, marker.lng]).addTo(map)
+                        .bindPopup(`<b>${marker.title}</b><br>${marker.description}`);
+                });
+            }
+
+            // Function to handle errors in geolocation
+            function showError(error) {
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        alert("User denied the request for Geolocation.");
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        alert("Location information is unavailable.");
+                        break;
+                    case error.TIMEOUT:
+                        alert("The request to get user location timed out.");
+                        break;
+                    case error.UNKNOWN_ERROR:
+                        alert("An unknown error occurred.");
+                        break;
+                }
+            }
+            
+            // Initialize the map when the page loads
+            initMap();
         </script>
     </footer>
 </body>
