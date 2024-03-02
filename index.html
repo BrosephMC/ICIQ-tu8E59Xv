@@ -181,7 +181,7 @@
                 .openPopup();
 
             // Initialize marker for picking location
-            marker = L.marker([latitude, longitude], { draggable: true }).addTo(map);
+            marker = L.marker([latitude, longitude], { draggable: false }).addTo(map);
 
             // Event listener for click event on map
             map.on('click', onMapClick);
@@ -214,10 +214,23 @@
         // Function to enable picking location on the map
         function enablePickLocation() {
             alert("Click on the map to pick a location.");
+
+            // Remove existing marker if any
+            // if (marker) {
+            //     map.removeLayer(marker);
+            // }
+
+            // Listen for click event on the map and add a new marker
+            // map.on('click', function(e) {
+            //     pickedLocation = e.latlng;
+            //     marker = L.marker(pickedLocation).addTo(map);
+            //     marker.bindPopup('Chosen Location').openPopup();
+            //     marker.dragging.disable(); // Disable marker dragging
+            // });
         }
 
         // JSONBin configuration
-        const jsonBinUrl = 'https://api.jsonbin.io/v3/b/65e2d522266cfc3fde9204a2';
+        const jsonBinUrl = 'https://api.jsonbin.io/v3/b/65e311f01f5677401f372cf3';
         const apiKey = '$2a$10$MHFTpzvxIym4Z9yvH2sU4uJbasYk0bF3dALggGfSUQPxDaSuMeYLm';
 
         // Function to read data from JSONBin
