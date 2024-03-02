@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Viewer</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    #container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+    }
+    img {
+        max-width: 100%;
+        margin-top: 20px;
+    }
+</style>
+</head>
+<body>
+<div id="container">
+    <h1>Image Viewer</h1>
+    <input type="file" id="fileInput" accept="image/*">
+    <br>
+    <button onclick="previewImage()">Preview Image</button>
+    <button onclick="encodeImage()">Encode Image</button>
+    <button onclick="decodeImage()">Decode Image</button>
+    <br>
+    <img id="preview" src="" alt="Preview Image">
+    <br>
+    <textarea id="encodedImage" rows="10" cols="50"></textarea>
+    <br>
+    <img id="decodedImage" src="" alt="Decoded Image">
+</div>
+<script>
+    let imageData = null;
+
+    function previewImage() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('Please select an image file.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('preview');
+            preview.src = e.target.result;
+            imageData = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function encodeImage() {
+        if (!imageData) {
+            alert('Please select an image first.');
+            return;
+        }
+
+        const encodedImage = btoa(imageData.split(',')[1]);
+        const encodedImageElement = document.getElementById('encodedImage');
+        encodedImageElement.value = encodedImage;
+    }
+
+    function decodeImage() {
+        const encodedImageElement = document.getElementById('encodedImage');
+        const encodedImageData = encodedImageElement.value;
+        if (!encodedImageData) {
+            alert('Please encode an image first.');
+            return;
+        }
+
+        const decodedImageData = atob(encodedImageData);
+        const decodedImage = document.getElementById('decodedImage');
+        decodedImage.src = 'data:image/jpeg;base64,' + decodedImageData;
+    }
+</script>
+</body>
+</html>
