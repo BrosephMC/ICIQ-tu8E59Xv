@@ -15,6 +15,7 @@
             font-family: Inter, sans-serif;
             margin: 0;
             padding: 0;
+            font-size: 150%;
         }
         header {
             background-image: url('pic2.jpg');
@@ -58,9 +59,9 @@
             color: white;
             padding: 10px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 20px;
             background-color: rgb(77, 77, 77);
-            font-size: 15;
+            font-size: 20px;
         }
         #customButton:hover {
             background-color: #45a049;
@@ -73,6 +74,19 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+        }
+
+        .button2 {
+            cursor: pointer;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background-color: #3f5740;
+            font-size: 20px;
+        }
+        .button2:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
@@ -92,14 +106,14 @@
         <div id="map"></div>
 
         <h2>Read Data</h2>
-        <button onclick="readFromJSONBin()">Read Data</button>
+        <button class="button2" onclick="readFromJSONBin()">Read Data</button>
         <div id="read-result"></div>
     
         <h2>Write Data</h2>
         <p>Click on the map to pick a location:</p>
-        <button onclick="enablePickLocation()">Pick Location</button>
+        <button class="button2" onclick="enablePickLocation()">🧭 Pick Location</button>
         <input type="text" id="write-input" placeholder="Enter description">
-        <button onclick="writeToJSONBin()">Save Location</button>
+        <button class="button2" onclick="writeToJSONBin()">Save Location</button>
 
         <div id="imageContainer"></div>
     </main>
@@ -109,7 +123,7 @@
         <!-- Custom button to trigger file input -->
         <div id="uploadContainer">
             <!-- <h1>Image Upload</h1> -->
-            <button id="customButton" onclick="document.getElementById('imageInput').click()">Upload Image</button>
+            <button id="customButton" onclick="document.getElementById('imageInput').click()">📷 Upload Image</button>
         </div>
         <div id="imageContainer"></div>
     </footer>
