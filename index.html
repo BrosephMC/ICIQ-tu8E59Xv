@@ -44,6 +44,18 @@
             background-color: #597E52;
             /* margin-bottom: 500px; */
         }
+        .container {
+            height: 300px;
+            border: 1px solid #597E52;
+            padding: 10px;
+            padding-top:10px ;
+        }
+
+        .container img {
+            height: 100%;
+            width: auto; /* This ensures the image adjusts its height to maintain aspect ratio */
+        }
+        
         /* Styling for the custom upload button */
         #customButton {
             cursor: pointer;
@@ -79,6 +91,29 @@
         .button2:hover {
             background-color: #45a049;
         }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #1e6931;
+        }
+        th, td {
+            border: 1px solid #080808;
+            padding: 10px;
+        }
+        th {
+            background-color: #0b520f;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #0f6b26;
+        }
+        tr:hover {
+            background-color: #169621;
+            transform: scale(1.02);
+            transition: transform 0.2s ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -93,7 +128,7 @@
     </nav>
     <main>
         <h2>Welcome To Cleen</h2>
-        <p>To help out our comunnity, we have decided to take the environments health into our own hands and help clean it up!</p>
+        <p>To help out our community, we have decided to take the environment's health into our own hands and help clean it up!</p>
         <div id="map"></div>
 
         <h2>Read Data</h2>
@@ -107,7 +142,69 @@
         <button class="button2" onclick="writeToJSONBin()">Save Location</button>
         <button class="button2" onclick="clearData()">Clear Data (dev tool)</button>
 
-        <div id="imageContainer"></div>
+        <div class="container" id="imageContainer"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th class="rank">Rank</th>
+                    <th>Username</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="rank">1</td>
+                    <td>User1</td>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <td class="rank">2</td>
+                    <td>User2</td>
+                    <td>95</td>
+                </tr>
+                <tr>
+                    <td class="rank">3</td>
+                    <td>User3</td>
+                    <td>90</td>
+                </tr>
+                <tr>
+                    <td class="rank">4</td>
+                    <td>User4</td>
+                    <td>85</td>
+                </tr>
+                <tr>
+                    <td class="rank">5</td>
+                    <td>User5</td>
+                    <td>80</td>
+                </tr>
+                <tr>
+                    <td class="rank">6</td>
+                    <td>User6</td>
+                    <td>75</td>
+                </tr>
+                <tr>
+                    <td class="rank">7</td>
+                    <td>User7</td>
+                    <td>70</td>
+                </tr>
+                <tr>
+                    <td class="rank">8</td>
+                    <td>User8</td>
+                    <td>65</td>
+                </tr>
+                <tr>
+                    <td class="rank">9</td>
+                    <td>User9</td>
+                    <td>60</td>
+                </tr>
+                <tr>
+                    <td class="rank">10</td>
+                    <td>User10</td>
+                    <td>55</td>
+                </tr>
+            </tbody>
+        </table>
     </main>
     <footer>
         <!-- Hidden file input -->
