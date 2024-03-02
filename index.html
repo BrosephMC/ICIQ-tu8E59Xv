@@ -89,6 +89,17 @@
         <h2>Welcome To Cleen</h2>
         <p>We love green things and that why we need YOU to help keep things green </p>
         <div id="map"></div>
+
+        <h2>Read Data</h2>
+        <button onclick="readFromJSONBin()">Read Data</button>
+        <div id="read-result"></div>
+    
+        <h2>Write Data</h2>
+        <p>Click on the map to pick a location:</p>
+        <button onclick="enablePickLocation()">Pick Location</button>
+        <input type="text" id="write-input" placeholder="Enter description">
+        <button onclick="writeToJSONBin()">Save Location</button>
+
         <div id="imageContainer"></div>
     </main>
     <footer>
@@ -121,6 +132,10 @@
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
+        let map;
+        let marker;
+        let pickedLocation;
+
         // Function to initialize the map
         function initMap() {
             // Check if geolocation is supported
@@ -138,7 +153,7 @@
             let longitude = position.coords.longitude;
 
             // Create map centered at user's location
-            let map = L.map('map').setView([latitude, longitude], 15);
+            map = L.map('map').setView([latitude, longitude], 15);
 
             // Add tile layer (OpenStreetMap)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -150,17 +165,17 @@
                 .bindPopup('Your Location')
                 .openPopup();
 
-            // Array of custom markers with their locations
-            let customMarkers = [
-                { lat: latitude + 0.01, lng: longitude + 0.01, title: 'Custom Marker 1', description: 'This is a custom marker.' },
-                { lat: latitude - 0.01, lng: longitude - 0.01, title: 'Custom Marker 2', description: 'Another custom marker.' }
-            ];
+            // Initialize marker for picking location
+            marker = L.marker([latitude, longitude], { draggable: true }).addTo(map);
 
-            // Add custom markers to the map
-            customMarkers.forEach(marker => {
-                L.marker([marker.lat, marker.lng]).addTo(map)
-                    .bindPopup(`<b>${marker.title}</b><br>${marker.description}`);
-            });
+            // Event listener for click event on map
+            map.on('click', onMapClick);
+        }
+
+        // Function to handle click event on map
+        function onMapClick(e) {
+            pickedLocation = e.latlng;
+            marker.setLatLng(pickedLocation);
         }
 
         // Function to handle errors in geolocation
@@ -178,6 +193,60 @@
                 case error.UNKNOWN_ERROR:
                     alert("An unknown error occurred.");
                     break;
+            }
+        }
+
+        // Function to enable picking location on the map
+        function enablePickLocation() {
+            alert("Click on the map to pick a location.");
+        }
+
+        // JSONBin configuration
+        const jsonBinUrl = 'https://api.jsonbin.io/v3/b/65e2d522266cfc3fde9204a2';
+        const apiKey = '$2a$10$MHFTpzvxIym4Z9yvH2sU4uJbasYk0bF3dALggGfSUQPxDaSuMeYLm';
+
+        // Function to read data from JSONBin
+        async function readFromJSONBin() {
+            try {
+                const response = await fetch(jsonBinUrl + '/latest', {
+                    headers: {
+                        'X-Master-Key': apiKey
+                    }
+                });
+                const responseData = await response.json();
+                document.getElementById('read-result').textContent = JSON.stringify(responseData, null, 2);
+            } catch (error) {
+                console.error('Error reading from JSONBin:', error);
+            }
+        }
+
+        // Function to write data to JSONBin
+        async function writeToJSONBin() {
+            const description = document.getElementById('write-input').value;
+            if (!pickedLocation || !description) {
+                alert("Please pick a location on the map and enter a description.");
+                return;
+            }
+
+            const newData = {
+                latitude: pickedLocation.lat,
+                longitude: pickedLocation.lng,
+                description: description
+            };
+
+            try {
+                const response = await fetch(jsonBinUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': apiKey
+                    },
+                    body: JSON.stringify(newData)
+                });
+                const responseData = await response.json();
+                console.log('Data written to JSONBin:', responseData);
+            } catch (error) {
+                console.error('Error writing to JSONBin:', error);
             }
         }
 
