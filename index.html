@@ -423,6 +423,7 @@
                 console.error('Error creating/updating entry:', error);
                 alert('An error occurred while creating/updating entry. Please check the console for details.');
             }
+            readMarkersFromJSONBin();
         }
 
         async function clearData() {
@@ -449,6 +450,7 @@
                 console.error('Error clearing data:', error);
                 alert('An error occurred while clearing data. Please check the console for details.');
             }
+            readMarkersFromJSONBin()
         }
 
         // Initialize the map when the page loads
