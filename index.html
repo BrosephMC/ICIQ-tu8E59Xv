@@ -50,16 +50,40 @@
         <a href="#">About</a>
         <a href="#">Services</a>
         <a href="#">Contact</a>
-        <a href="#">Upload Picture</a>
-        <a href="#">Find Trash Near You</a>
     </nav>
     <main>
         <h2>Welcome To Cleen</h2>
         <p>We love green things and that why we need YOU to help keep things green </p>
         <img src="download.jpg" alt="My Image">
+        <div id="imageContainer"></div>
     </main>
     <footer>
         <a href="#">Find Trash</a>
+
+
+        <h1>Image Upload</h1>
+        <input type="file" id="imageInput" accept="image/*">
+        <button onclick="uploadImage()">Upload</button>
+        
+
+        <script>
+            function uploadImage() {
+                const fileInput = document.getElementById('imageInput');
+                const file = fileInput.files[0];
+                if (!file) {
+                    alert('Please select an image.');
+                    return;
+                }
+    
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const imageUrl = event.target.result;
+                    const imageContainer = document.getElementById('imageContainer');
+                    imageContainer.innerHTML = '<img src="' + imageUrl + '" alt="Uploaded Image">';
+                };
+                reader.readAsDataURL(file);
+            }
+        </script>
     </footer>
 </body>
 </html>
