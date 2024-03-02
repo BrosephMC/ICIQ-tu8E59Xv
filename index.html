@@ -228,21 +228,80 @@
         <div id="imageContainer"></div>
     </footer>
     <script>
-        document.getElementById('imageInput').addEventListener('change', function() {
-            const file = this.files[0];
-            if (!file) {
-                alert('Please select an image.');
-                return;
-            }
+        // document.getElementById('imageInput').addEventListener('change', function() {
+        //     const file = this.files[0];
+        //     if (!file) {
+        //         alert('Please select an image.');
+        //         return;
+        //     }
 
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const imageUrl = event.target.result;
+        //     const reader = new FileReader();
+        //     reader.onload = function(event) {
+        //         const imageUrl = event.target.result;
+        //         const imageContainer = document.getElementById('imageContainer');
+        //         imageContainer.innerHTML = '<img src="' + imageUrl + '" alt="Uploaded Image">';
+        //     };
+        //     reader.readAsDataURL(file);
+        // });
+    document.getElementById('imageInput').addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) {
+            alert('Please select an image.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const imageUrl = event.target.result;
+            
+            // Create an Image element
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const maxWidth = 800; // Max width for compressed image
+                const maxHeight = 600; // Max height for compressed image
+                let width = img.width;
+                let height = img.height;
+
+                // Resize the image if needed
+                if (width > maxWidth || height > maxHeight) {
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+                }
+
+                // Set canvas dimensions
+                canvas.width = width;
+                canvas.height = height;
+
+                // Draw the image on the canvas
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Get the compressed image data URL
+                const compressedImageUrl = canvas.toDataURL('image/jpeg', 0.1); // Adjust quality here (0.8 is 80% quality)
+
+                // Set the compressed image as the source for the image container
                 const imageContainer = document.getElementById('imageContainer');
-                imageContainer.innerHTML = '<img src="' + imageUrl + '" alt="Uploaded Image">';
+                imageContainer.innerHTML = '<img src="' + compressedImageUrl + '" alt="Uploaded Image">';
             };
-            reader.readAsDataURL(file);
-        });
+
+            // Set the source of the image element
+            img.src = imageUrl;
+        };
+
+        // Read the file as data URL
+        reader.readAsDataURL(file);
+    });
+
     </script>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -344,7 +403,7 @@
                     }
                 });
                 const responseData = await response.json();
-                
+
                 // Clear existing markers
                 markers.forEach(marker => {
                     map.removeLayer(marker);
@@ -354,9 +413,23 @@
                 // Add markers for each location (skip the first entry with null data)
                 if (responseData && responseData.record) {
                     responseData.record.slice(1).forEach(location => {
-                        const { latitude, longitude, description } = location;
+                        const { latitude, longitude, description, image } = location;
+
+                        // Create marker
                         const marker = L.marker([latitude, longitude], { icon: trashIcon }).addTo(map);
-                        marker.bindPopup(description).openPopup();
+
+                        // Create popup content with description and image preview
+                        const popupContent = `
+                            <div>
+                                <h3>${description}</h3>
+                                <img src="${image}" alt="Trash Image" style="max-width: 200px;">
+                            </div>
+                        `;
+
+                        // Bind popup to marker
+                        marker.bindPopup(popupContent);
+
+                        // Add marker to markers array
                         markers.push(marker);
                     });
                 }
@@ -382,16 +455,28 @@
 
         async function writeToJSONBin() {
             const description = document.getElementById('write-input').value;
-            if (!pickedLocation || !description) {
-                alert("Please pick a location on the map and enter a description.");
+            try {
+                imageData = document.querySelector('#imageContainer img').getAttribute("src");
+            } catch {
+                alert("Please upload a photo.");
                 return;
             }
+            if (!pickedLocation || !description) {
+                alert("Please pick a location on the map and enter a description.");
+                console.log("pickedLocation", pickedLocation);
+                console.log("description", description);
+                console.log("image", imageData);
+                return;
+            }
+
+            console.log(imageData);
+            // imageData = "\"data:image/jpeg;base64,Ukl==\""
 
             const newData = {
                 latitude: pickedLocation.lat,
                 longitude: pickedLocation.lng,
                 description: description,
-                image: "image data"
+                image: imageData
             };
 
             try {
