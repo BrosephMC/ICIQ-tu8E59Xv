@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User and Custom Markers Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <style>
+        #map {
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>User and Custom Markers Map</h1>
+    
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Function to initialize the map
+        function initMap() {
+            // Check if geolocation is supported
+            if (navigator.geolocation) {
+                // Request permission to access location
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Function to display user's location and custom markers on the map
+        function showPosition(position) {
+            let latitude = position.coords.latitude;
+            let longitude = position.coords.longitude;
+
+            // Create map centered at user's location
+            let map = L.map('map').setView([latitude, longitude], 15);
+
+            // Add tile layer (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Add marker for user's location
+            L.marker([latitude, longitude]).addTo(map)
+                .bindPopup('Your Location')
+                .openPopup();
+
+            // Array of custom markers with their locations
+            let customMarkers = [
+                { lat: latitude + 0.01, lng: longitude + 0.01, title: 'Custom Marker 1', description: 'This is a custom marker.' },
+                { lat: latitude - 0.01, lng: longitude - 0.01, title: 'Custom Marker 2', description: 'Another custom marker.' }
+            ];
+
+            // Add custom markers to the map
+            customMarkers.forEach(marker => {
+                L.marker([marker.lat, marker.lng]).addTo(map)
+                    .bindPopup(`<b>${marker.title}</b><br>${marker.description}`);
+            });
+        }
+
+        // Function to handle errors in geolocation
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("User denied the request for Geolocation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable.");
+                    break;
+                case error.TIMEOUT:
+                    alert("The request to get user location timed out.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("An unknown error occurred.");
+                    break;
+            }
+        }
+        
+        // Initialize the map when the page loads
+        initMap();
+    </script>
+</body>
+</html>
