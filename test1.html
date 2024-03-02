@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            margin-top: 20px;
+            color: #333;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+            transform: scale(1.02);
+            transition: transform 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <h1>Leaderboard</h1>
+    <table id="leaderboardTable">
+        <tr>
+            <th>Rank</th>
+            <th>Name</th>
+            <th>Score</th>
+        </tr>
+    </table>
+
+    <script>
+        const jsonBinApiKey = '$2a$10$MHFTpzvxIym4Z9yvH2sU4uJbasYk0bF3dALggGfSUQPxDaSuMeYLm';
+        const jsonBinUrl = 'https://api.jsonbin.io/b/your-bin-id/latest';
+
+        fetch(jsonBinUrl, {
+            headers: {
+                'X-Master-Key': jsonBinApiKey
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const leaderboardTable = document.getElementById('leaderboardTable');
+
+            data.forEach((entry, index) => {
+                const row = leaderboardTable.insertRow(-1);
+                const rankCell = row.insertCell(0);
+                const nameCell = row.insertCell(1);
+                const scoreCell = row.insertCell(2);
+
+                rankCell.textContent = index + 1;
+                nameCell.textContent = entry.name;
+                scoreCell.textContent = entry.score;
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching leaderboard data:', error);
+        });
+    </script>
+</body>
+</html>
