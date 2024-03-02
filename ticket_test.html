@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User and Custom Markers Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <style>
+        #map {
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>User and Custom Markers Map</h1>
+    
+    <div id="map"></div>
+
+    <h2>Read Data</h2>
+    <button onclick="readFromJSONBin()">Read Data</button>
+    <div id="read-result"></div>
+
+    <h2>Write Data</h2>
+    <p>Click on the map to pick a location:</p>
+    <button onclick="enablePickLocation()">Pick Location</button>
+    <input type="text" id="write-input" placeholder="Enter description">
+    <button onclick="writeToJSONBin()">Save Location</button>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let marker;
+        let pickedLocation;
+
+        // Function to initialize the map
+        function initMap() {
+            // Check if geolocation is supported
+            if (navigator.geolocation) {
+                // Request permission to access location
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Function to display user's location and custom markers on the map
+        function showPosition(position) {
+            let latitude = position.coords.latitude;
+            let longitude = position.coords.longitude;
+
+            // Create map centered at user's location
+            map = L.map('map').setView([latitude, longitude], 15);
+
+            // Add tile layer (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Add marker for user's location
+            L.marker([latitude, longitude]).addTo(map)
+                .bindPopup('Your Location')
+                .openPopup();
+
+            // Initialize marker for picking location
+            marker = L.marker([latitude, longitude], { draggable: true }).addTo(map);
+
+            // Event listener for click event on map
+            map.on('click', onMapClick);
+        }
+
+        // Function to handle click event on map
+        function onMapClick(e) {
+            pickedLocation = e.latlng;
+            marker.setLatLng(pickedLocation);
+        }
+
+        // Function to handle errors in geolocation
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("User denied the request for Geolocation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable.");
+                    break;
+                case error.TIMEOUT:
+                    alert("The request to get user location timed out.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("An unknown error occurred.");
+                    break;
+            }
+        }
+
+        // Function to enable picking location on the map
+        function enablePickLocation() {
+            alert("Click on the map to pick a location.");
+        }
+
+        // JSONBin configuration
+        const jsonBinUrl = 'https://api.jsonbin.io/v3/b/65e2d522266cfc3fde9204a2';
+        const apiKey = '$2a$10$MHFTpzvxIym4Z9yvH2sU4uJbasYk0bF3dALggGfSUQPxDaSuMeYLm';
+
+        // Function to read data from JSONBin
+        async function readFromJSONBin() {
+            try {
+                const response = await fetch(jsonBinUrl + '/latest', {
+                    headers: {
+                        'X-Master-Key': apiKey
+                    }
+                });
+                const responseData = await response.json();
+                document.getElementById('read-result').textContent = JSON.stringify(responseData, null, 2);
+            } catch (error) {
+                console.error('Error reading from JSONBin:', error);
+            }
+        }
+
+        // Function to write data to JSONBin
+        async function writeToJSONBin() {
+            const description = document.getElementById('write-input').value;
+            if (!pickedLocation || !description) {
+                alert("Please pick a location on the map and enter a description.");
+                return;
+            }
+
+            const newData = {
+                latitude: pickedLocation.lat,
+                longitude: pickedLocation.lng,
+                description: description
+            };
+
+            try {
+                const response = await fetch(jsonBinUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': apiKey
+                    },
+                    body: JSON.stringify(newData)
+                });
+                const responseData = await response.json();
+                console.log('Data written to JSONBin:', responseData);
+            } catch (error) {
+                console.error('Error writing to JSONBin:', error);
+            }
+        }
+
+        // Initialize the map when the page loads
+        initMap();
+    </script>
+</body>
+</html>
