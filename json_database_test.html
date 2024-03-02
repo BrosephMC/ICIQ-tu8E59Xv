@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSONBin Reader/Writer</title>
+</head>
+<body>
+    <h1>JSONBin Reader/Writer</h1>
+
+    <h2>Read Data</h2>
+    <button onclick="readFromJSONBin()">Read Data</button>
+    <div id="read-result"></div>
+
+    <h2>Write Data</h2>
+    <input type="text" id="write-input" placeholder="Enter data to write">
+    <button onclick="writeToJSONBin()">Write Data</button>
+
+    <script>
+        // JSONBin configuration
+        const jsonBinUrl = 'https://api.jsonbin.io/v3/b/65e2d522266cfc3fde9204a2';
+        const apiKey = '$2a$10$MHFTpzvxIym4Z9yvH2sU4uJbasYk0bF3dALggGfSUQPxDaSuMeYLm';
+
+        // Function to read data from JSONBin
+        async function readFromJSONBin() {
+            try {
+                const response = await fetch(jsonBinUrl + '/latest', {
+                    headers: {
+                        'X-Master-Key': apiKey
+                    }
+                });
+                const responseData = await response.json();
+                document.getElementById('read-result').textContent = JSON.stringify(responseData, null, 2);
+            } catch (error) {
+                console.error('Error reading from JSONBin:', error);
+            }
+        }
+
+        // Function to write data to JSONBin
+        async function writeToJSONBin() {
+            const data = document.getElementById('write-input').value;
+            try {
+                const response = await fetch(jsonBinUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': apiKey
+                    },
+                    body: JSON.stringify({ data })
+                });
+                const responseData = await response.json();
+                console.log('Data written to JSONBin:', responseData);
+            } catch (error) {
+                console.error('Error writing to JSONBin:', error);
+            }
+        }
+    </script>
+</body>
+</html>
