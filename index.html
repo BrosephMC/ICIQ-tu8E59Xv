@@ -44,15 +44,6 @@
             background-color: #597E52;
             /* margin-bottom: 500px; */
         }
-        /* footer {
-            background-color: #333;
-            color: #fffefe;
-            text-align: center;
-            padding: 10px 0;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        } */
         /* Styling for the custom upload button */
         #customButton {
             cursor: pointer;
@@ -111,9 +102,10 @@
     
         <h2>Write Data</h2>
         <p>Click on the map to pick a location:</p>
-        <button class="button2" onclick="enablePickLocation()">🧭 Pick Location</button>
+        <button class="button2" onclick="readMarkersFromJSONBin()">🔃 Refresh Locations (WIP)</button>
         <input type="text" id="write-input" placeholder="Enter description">
         <button class="button2" onclick="writeToJSONBin()">Save Location</button>
+        <button class="button2" onclick="clearData()">Clear Data (dev tool)</button>
 
         <div id="imageContainer"></div>
     </main>
@@ -211,27 +203,41 @@
             }
         }
 
-        // Function to enable picking location on the map
-        function enablePickLocation() {
-            alert("Click on the map to pick a location.");
-
-            // Remove existing marker if any
-            // if (marker) {
-            //     map.removeLayer(marker);
-            // }
-
-            // Listen for click event on the map and add a new marker
-            // map.on('click', function(e) {
-            //     pickedLocation = e.latlng;
-            //     marker = L.marker(pickedLocation).addTo(map);
-            //     marker.bindPopup('Chosen Location').openPopup();
-            //     marker.dragging.disable(); // Disable marker dragging
-            // });
-        }
-
         // JSONBin configuration
         const jsonBinUrl = 'https://api.jsonbin.io/v3/b/65e311f01f5677401f372cf3';
         const apiKey = '$2a$10$MHFTpzvxIym4Z9yvH2sU4uJbasYk0bF3dALggGfSUQPxDaSuMeYLm';
+
+        // Function to read marker data from JSONBin
+        async function readMarkersFromJSONBin() {
+            try {
+                const response = await fetch(jsonBinUrl + '/latest', {
+                    headers: {
+                        'X-Master-Key': apiKey
+                    }
+                });
+                const responseData = await response.json();
+                
+                // Clear existing markers
+                if (markers) {
+                    markers.forEach(marker => {
+                        map.removeLayer(marker);
+                    });
+                }
+
+                // Add markers for each location
+                if (responseData && responseData.record) {
+                    responseData.record.forEach(location => {
+                        const { latitude, longitude, description } = location;
+                        const marker = L.marker([latitude, longitude]).addTo(map);
+                        marker.bindPopup(description).openPopup();
+                        markers.push(marker);
+                    });
+                }
+            } catch (error) {
+                console.error('Error reading from JSONBin:', error);
+            }
+        }
+
 
         // Function to read data from JSONBin
         async function readFromJSONBin() {
@@ -242,13 +248,12 @@
                     }
                 });
                 const responseData = await response.json();
-                document.getElementById('read-result').textContent = JSON.stringify(responseData, null, 2);
+                document.getElementById('read-result').textContent = JSON.stringify(responseData.record, null, 2);
             } catch (error) {
                 console.error('Error reading from JSONBin:', error);
             }
         }
 
-        // Function to write data to JSONBin
         async function writeToJSONBin() {
             const description = document.getElementById('write-input').value;
             if (!pickedLocation || !description) {
@@ -259,8 +264,61 @@
             const newData = {
                 latitude: pickedLocation.lat,
                 longitude: pickedLocation.lng,
-                description: description
+                description: description,
+                image: "image data"
             };
+
+            try {
+                // Fetch existing data from JSONBin
+                const response = await fetch(jsonBinUrl + '/latest', {
+                    headers: {
+                        'X-Master-Key': apiKey
+                    }
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to fetch existing data:', response.statusText);
+                    alert('Failed to fetch existing data. Please check the console for details.');
+                    return;
+                }
+
+                const existingData = await response.json();
+                let updatedData;
+
+                if (existingData && existingData.record) {
+                    // If existing data exists, append new data to it
+                    // updatedData = [existingData.record, newData];
+                    updatedData = existingData.record.concat(newData);
+                } else {
+                    // If no existing data, create a new array with the new data
+                    updatedData = [newData];
+                }
+
+                // Update the data in JSONBin
+                const updateResponse = await fetch(jsonBinUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': apiKey
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (updateResponse.ok) {
+                    console.log('Entry created/updated successfully:', newData);
+                    alert('Entry created/updated successfully!');
+                } else {
+                    console.error('Failed to create/update entry:', updateResponse.statusText);
+                    alert('Failed to create/update entry. Please check the console for details.');
+                }
+            } catch (error) {
+                console.error('Error creating/updating entry:', error);
+                alert('An error occurred while creating/updating entry. Please check the console for details.');
+            }
+        }
+
+        async function clearData() {
+            const nullData = [{"null": "null"}];
 
             try {
                 const response = await fetch(jsonBinUrl, {
@@ -269,12 +327,19 @@
                         'Content-Type': 'application/json',
                         'X-Master-Key': apiKey
                     },
-                    body: JSON.stringify(newData)
+                    body: JSON.stringify(nullData)
                 });
-                const responseData = await response.json();
-                console.log('Data written to JSONBin:', responseData);
+
+                if (response.ok) {
+                    console.log('Data cleared successfully');
+                    alert('Data cleared successfully!');
+                } else {
+                    console.error('Failed to clear data:', response.statusText);
+                    alert('Failed to clear data. Please check the console for details.');
+                }
             } catch (error) {
-                console.error('Error writing to JSONBin:', error);
+                console.error('Error clearing data:', error);
+                alert('An error occurred while clearing data. Please check the console for details.');
             }
         }
 
